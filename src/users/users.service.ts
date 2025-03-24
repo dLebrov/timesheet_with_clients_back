@@ -1,32 +1,40 @@
-import { Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
-import { User } from './user.entity';
-import { InjectRepository } from '@nestjs/typeorm';
+import { ConflictException, Injectable } from '@nestjs/common';
+import * as argon2 from 'argon2';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { usersDto } from 'src/swagger-dto/users.dto';
 
 @Injectable()
 export class UsersService {
-  constructor(
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(): Promise<User[]> {
-    return this.userRepository.find();
+  async findAll(): Promise<usersDto[]> {
+    return this.prisma.users.findMany();
   }
 
-  async createUser(props: {
-    name: string;
-    surname: string;
-    password: string;
-  }): Promise<User> {
-    const { name, surname, password } = props;
+  async hashPassword(password: string): Promise<string> {
+    return await argon2.hash(password);
+  }
 
-    const user = this.userRepository.create({
-      name,
-      surname,
-      password: password,
+  async createUser(data: Omit<usersDto, 'id'>): Promise<usersDto> {
+    const { email, name, surname, password } = data;
+
+    const existingUser = await this.prisma.users.findUnique({
+      where: { email },
     });
 
-    return this.userRepository.save(user);
+    if (existingUser) {
+      throw new ConflictException('Пользователь с таким email уже существует');
+    }
+
+    const passwordHash = await this.hashPassword(password);
+
+    return this.prisma.users.create({
+      data: {
+        name,
+        surname,
+        email,
+        password: passwordHash,
+      },
+    });
   }
 }
