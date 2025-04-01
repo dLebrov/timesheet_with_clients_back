@@ -9,6 +9,7 @@ async function bootstrap() {
     .setTitle('tswc-api')
     .setDescription('Документация API tswc')
     .setVersion('0.1')
+    .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

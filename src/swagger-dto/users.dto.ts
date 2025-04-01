@@ -11,4 +11,6 @@ export class usersDto {
     password: string;
     @ApiProperty()
     email: string;
+    @ApiProperty()
+    username: string;
 }

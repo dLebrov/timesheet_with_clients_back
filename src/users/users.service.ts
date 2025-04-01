@@ -16,10 +16,12 @@ export class UsersService {
   }
 
   async createUser(data: Omit<usersDto, 'id'>): Promise<usersDto> {
-    const { email, name, surname, password } = data;
+    const { email, name, surname, password, username } = data;
 
-    const existingUser = await this.prisma.users.findUnique({
-      where: { email },
+    const existingUser = await this.prisma.users.findFirst({
+      where: {
+        OR: [{ email }, { username }],
+      },
     });
 
     if (existingUser) {
@@ -33,6 +35,7 @@ export class UsersService {
         name,
         surname,
         email,
+        username,
         password: passwordHash,
       },
     });
