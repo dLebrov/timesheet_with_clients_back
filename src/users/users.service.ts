@@ -2,10 +2,15 @@ import { ConflictException, Injectable } from '@nestjs/common';
 import * as argon2 from 'argon2';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { usersDto } from 'src/swagger-dto/users.dto';
+import { AuthService } from './../auth/auth.service';
+import { CreateUsersParamsDto } from './dto/users.dto';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly auth: AuthService,
+  ) {}
 
   async findAll(): Promise<usersDto[]> {
     return this.prisma.users.findMany();
@@ -15,8 +20,10 @@ export class UsersService {
     return await argon2.hash(password);
   }
 
-  async createUser(data: Omit<usersDto, 'id'>): Promise<usersDto> {
-    const { email, name, surname, password, username } = data;
+  async createUser(
+    data: CreateUsersParamsDto,
+  ): Promise<{ access_token: string; user: Omit<usersDto, 'password'> }> {
+    const { email, password, username, ...user } = data;
 
     const existingUser = await this.prisma.users.findFirst({
       where: {
@@ -30,14 +37,15 @@ export class UsersService {
 
     const passwordHash = await this.hashPassword(password);
 
-    return this.prisma.users.create({
+    const createdUser = await this.prisma.users.create({
       data: {
-        name,
-        surname,
         email,
         username,
         password: passwordHash,
+        ...user,
       },
     });
+
+    return this.auth.loginIn(createdUser.username, password);
   }
 }

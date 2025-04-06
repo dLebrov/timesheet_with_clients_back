@@ -8,11 +8,25 @@ const schemaContent = fs.readFileSync(schemaPath, 'utf-8');
 
 // Регулярное выражение для поиска всех моделей в схеме
 const modelRegex = /model\s+(\w+)\s+{([\s\S]*?)}/g;
+const enumRegex = /enum\s+(\w+)\s+{([\s\S]*?)}/g;
+
 let match: RegExpExecArray | null;
 const models: Array<{ modelName: string; modelBody: string }> = [];
+const enums: Record<string, string[]> = {};
 
+// Извлекаем все модели
 while ((match = modelRegex.exec(schemaContent)) !== null) {
   models.push({ modelName: match[1], modelBody: match[2] });
+}
+
+// Извлекаем все enum
+while ((match = enumRegex.exec(schemaContent)) !== null) {
+  const enumName = match[1];
+  const enumValues = match[2]
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line);
+  enums[enumName] = enumValues;
 }
 
 const project = new Project();
@@ -34,6 +48,12 @@ models.forEach(({ modelName, modelBody }) => {
   sourceFile.addImportDeclaration({
     namedImports: ['ApiProperty'],
     moduleSpecifier: '@nestjs/swagger',
+  });
+
+  // Добавляем импорт для всех enum из src/enums/enums
+  sourceFile.addImportDeclaration({
+    namedImports: Object.keys(enums),
+    moduleSpecifier: '@prisma/client',
   });
 
   // Создаем класс DTO с именем ModelNameDto
@@ -64,7 +84,10 @@ models.forEach(({ modelName, modelBody }) => {
       isArray = true;
       fieldType = fieldType.slice(0, -2);
     }
-    const tsType = convertPrismaTypeToTs(fieldType);
+
+    // Проверяем, является ли поле enum
+    const isEnum = enums[fieldType] !== undefined;
+    const tsType = isEnum ? fieldType : convertPrismaTypeToTs(fieldType);
     const finalType = isArray ? `${tsType}[]` : tsType;
 
     // Добавляем свойство класса с декоратором ApiProperty
@@ -75,7 +98,9 @@ models.forEach(({ modelName, modelBody }) => {
       decorators: [
         {
           name: 'ApiProperty',
-          arguments: [],
+          arguments: isEnum
+            ? [`{ enum: ${fieldType}, enumName: '${fieldType}' }`]
+            : [],
         },
       ],
     });

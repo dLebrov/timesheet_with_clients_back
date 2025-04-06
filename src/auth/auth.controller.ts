@@ -1,7 +1,8 @@
 import { Body, Controller, Post } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags, OmitType } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { LoginDto } from './dto/login.dto';
+import { LoginParamsDto, LoginResponseDto } from './dto/login.dto';
+import { usersDto } from 'src/swagger-dto/users.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -18,9 +19,10 @@ export class AuthController {
     status: 200,
     description:
       'Пользователь успешно аутентифицирован. Возвращает access token и информацию о пользователе.',
+    type: [LoginResponseDto],
   })
   @ApiResponse({ status: 401, description: 'Неверные учетные данные' })
-  async login(@Body() body: LoginDto) {
+  async login(@Body() body: LoginParamsDto) {
     return this.authService.loginIn(body.login, body.password);
   }
 }
