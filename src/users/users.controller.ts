@@ -22,9 +22,10 @@ export class UsersController {
     description: 'Пользователь успешно создан',
     type: [OmitType(usersDto, ['password'])],
   })
-  async createUser(
-    @Body() createUserDto: CreateUsersParamsDto,
-  ): Promise<{ access_token: string; user: Omit<usersDto, 'password'> }> {
+  async createUser(@Body() createUserDto: CreateUsersParamsDto): Promise<{
+    access_token: string;
+    user: Omit<usersDto, 'password' | 'clients'>;
+  }> {
     return this.usersService.createUser(createUserDto);
   }
 
@@ -37,7 +38,7 @@ export class UsersController {
   })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  async getAllUsers(): Promise<Omit<usersDto[], 'password'>> {
+  async getAllUsers(): Promise<Omit<usersDto, 'password'>[]> {
     return this.usersService.findAll();
   }
 }

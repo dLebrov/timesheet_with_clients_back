@@ -1,13 +1,14 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Role, Gender } from "@prisma/client";
+import { clientsDto } from "./clients.dto";
 
 export class usersDto {
     @ApiProperty()
     id: number;
     @ApiProperty()
-    name: string;
-    @ApiProperty()
     surname: string;
+    @ApiProperty()
+    name: string;
     @ApiProperty()
     password: string;
     @ApiProperty()
@@ -22,4 +23,6 @@ export class usersDto {
     phone: string;
     @ApiProperty({ enum: Gender, enumName: 'Gender' })
     gender: Gender;
+    @ApiProperty()
+    clients: Omit<clientsDto, 'users'>[];
 }

@@ -19,6 +19,9 @@ export class AuthService {
       where: {
         OR: [{ email: login }, { username: login }],
       },
+      include: {
+        clients: true,
+      },
     });
 
     if (!user) {

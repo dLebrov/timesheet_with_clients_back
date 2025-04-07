@@ -50,27 +50,56 @@ models.forEach(({ modelName, modelBody }) => {
     moduleSpecifier: '@nestjs/swagger',
   });
 
-  // Добавляем импорт для всех enum из src/enums/enums
-  sourceFile.addImportDeclaration({
-    namedImports: Object.keys(enums),
-    moduleSpecifier: '@prisma/client',
-  });
-
-  // Создаем класс DTO с именем ModelNameDto
-  const className = `${modelName}Dto`;
-  const dtoClass = sourceFile.addClass({
-    name: className,
-    isExported: true,
-  });
-
   // Разбиваем блок модели на строки и фильтруем пустые и директивы
   const lines = modelBody
     .split('\n')
     .map((line) => line.trim())
     .filter((line) => line && !line.startsWith('//') && !line.startsWith('@@'));
 
+  // Определяем, какие enums и связи используются в текущей модели
+  const usedEnums = new Set<string>();
+  const relatedModels = new Set<string>();
+
   lines.forEach((line) => {
-    // Пример строки: "id Int @id @default(autoincrement())"
+    const parts = line.split(/\s+/);
+    if (parts.length < 2) return;
+    let fieldType = parts[1].replace('?', ''); // Убираем "?" для необязательных полей
+    if (fieldType.endsWith('[]')) {
+      fieldType = fieldType.slice(0, -2); // Убираем "[]" для массивов
+    }
+    if (enums[fieldType]) {
+      usedEnums.add(fieldType); // Добавляем enum, если он используется
+    } else if (models.some((model) => model.modelName === fieldType)) {
+      relatedModels.add(fieldType); // Добавляем связанные модели
+    }
+  });
+
+  // Добавляем импорт для используемых enums из @prisma/client
+  if (usedEnums.size > 0) {
+    sourceFile.addImportDeclaration({
+      namedImports: Array.from(usedEnums),
+      moduleSpecifier: '@prisma/client',
+    });
+  }
+
+  // Добавляем импорт для связанных моделей с корректным путём
+  if (relatedModels.size > 0) {
+    sourceFile.addImportDeclaration({
+      namedImports: Array.from(relatedModels).map((model) => `${model}Dto`),
+      moduleSpecifier: `./${Array.from(relatedModels)
+        .map((model) => model.toLowerCase())
+        .join(', ')}.dto`,
+    });
+  }
+
+  // Создаем основной DTO с именем ModelNameDto
+  const className = `${modelName}Dto`;
+  const dtoClass = sourceFile.addClass({
+    name: className,
+    isExported: true,
+  });
+
+  lines.forEach((line) => {
     const parts = line.split(/\s+/);
     if (parts.length < 2) return;
     const fieldName = parts[0];
@@ -87,7 +116,12 @@ models.forEach(({ modelName, modelBody }) => {
 
     // Проверяем, является ли поле enum
     const isEnum = enums[fieldType] !== undefined;
-    const tsType = isEnum ? fieldType : convertPrismaTypeToTs(fieldType);
+    const isRelation = models.some((model) => model.modelName === fieldType);
+    const tsType = isEnum
+      ? fieldType
+      : isRelation
+        ? `Omit<${fieldType}Dto, '${modelName.toLowerCase()}'>`
+        : convertPrismaTypeToTs(fieldType);
     const finalType = isArray ? `${tsType}[]` : tsType;
 
     // Добавляем свойство класса с декоратором ApiProperty

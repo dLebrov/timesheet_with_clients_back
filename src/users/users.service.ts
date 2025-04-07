@@ -12,17 +12,26 @@ export class UsersService {
     private readonly auth: AuthService,
   ) {}
 
-  async findAll(): Promise<usersDto[]> {
-    return this.prisma.users.findMany();
+  async findAll(): Promise<Omit<usersDto, 'password'>[]> {
+    return this.prisma.users.findMany({
+      include: {
+        clients: {
+          include: {
+            users: false,
+          },
+        },
+      },
+    });
   }
 
   async hashPassword(password: string): Promise<string> {
     return await argon2.hash(password);
   }
 
-  async createUser(
-    data: CreateUsersParamsDto,
-  ): Promise<{ access_token: string; user: Omit<usersDto, 'password'> }> {
+  async createUser(data: CreateUsersParamsDto): Promise<{
+    access_token: string;
+    user: Omit<usersDto, 'password' | 'clients'>;
+  }> {
     const { email, password, username, ...user } = data;
 
     const existingUser = await this.prisma.users.findFirst({
