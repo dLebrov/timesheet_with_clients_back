@@ -20,7 +20,18 @@ export class AuthService {
         OR: [{ email: login }, { username: login }],
       },
       include: {
-        clients: true,
+        clients: {
+          include: {
+            client_subjects: false,
+            records: false,
+          },
+        },
+        services: {
+          include: {
+            users: false,
+            records: false,
+          },
+        },
       },
     });
 
@@ -35,11 +46,11 @@ export class AuthService {
 
     const { password: _, ...userWithoutPassword } = user;
 
-    const payload = { ...userWithoutPassword };
+    const payload: Omit<usersDto, 'password'> = { ...userWithoutPassword };
 
     const access_token = this.jwtService.sign(payload);
 
-    return { access_token, user: userWithoutPassword };
+    return { access_token, user: payload };
   }
 
   async verifyPassword(plainPassword: string, hashedPassword: string) {

@@ -58,7 +58,7 @@ models.forEach(({ modelName, modelBody }) => {
 
   // Определяем, какие enums и связи используются в текущей модели
   const usedEnums = new Set<string>();
-  const relatedModels = new Set<string>();
+  const relatedModels = new Map<string, string[]>(); // Модель -> её связи
 
   lines.forEach((line) => {
     const parts = line.split(/\s+/);
@@ -70,7 +70,13 @@ models.forEach(({ modelName, modelBody }) => {
     if (enums[fieldType]) {
       usedEnums.add(fieldType); // Добавляем enum, если он используется
     } else if (models.some((model) => model.modelName === fieldType)) {
-      relatedModels.add(fieldType); // Добавляем связанные модели
+      const relatedModel = models.find(
+        (model) => model.modelName === fieldType,
+      );
+      if (relatedModel) {
+        const relatedFields = extractRelations(relatedModel.modelBody);
+        relatedModels.set(fieldType, relatedFields);
+      }
     }
   });
 
@@ -82,15 +88,13 @@ models.forEach(({ modelName, modelBody }) => {
     });
   }
 
-  // Добавляем импорт для связанных моделей с корректным путём
-  if (relatedModels.size > 0) {
+  // Добавляем отдельные импорты для связанных моделей
+  relatedModels.forEach((_, model) => {
     sourceFile.addImportDeclaration({
-      namedImports: Array.from(relatedModels).map((model) => `${model}Dto`),
-      moduleSpecifier: `./${Array.from(relatedModels)
-        .map((model) => model.toLowerCase())
-        .join(', ')}.dto`,
+      namedImports: [`${model}Dto`],
+      moduleSpecifier: `./${model.toLowerCase()}.dto`,
     });
-  }
+  });
 
   // Создаем основной DTO с именем ModelNameDto
   const className = `${modelName}Dto`;
@@ -116,12 +120,15 @@ models.forEach(({ modelName, modelBody }) => {
 
     // Проверяем, является ли поле enum
     const isEnum = enums[fieldType] !== undefined;
-    const isRelation = models.some((model) => model.modelName === fieldType);
+    const isRelation = relatedModels.has(fieldType);
     const tsType = isEnum
       ? fieldType
       : isRelation
-        ? `Omit<${fieldType}Dto, '${modelName.toLowerCase()}'>`
-        : convertPrismaTypeToTs(fieldType);
+        ? `Omit<${fieldType}Dto, ${relatedModels
+            .get(fieldType)
+            ?.map((relation) => `'${relation}'`)
+            .join(' | ')}>`
+        : convertPrismaTypeToTs(fieldType, isOptional);
     const finalType = isArray ? `${tsType}[]` : tsType;
 
     // Добавляем свойство класса с декоратором ApiProperty
@@ -147,19 +154,41 @@ project.save().then(() => {
 });
 
 // Функция для преобразования типов Prisma в типы TypeScript
-function convertPrismaTypeToTs(prismaType: string): string {
+function convertPrismaTypeToTs(
+  prismaType: string,
+  isOptional: boolean,
+): string {
   switch (prismaType) {
     case 'Int':
       return 'number';
     case 'Float':
       return 'number';
     case 'String':
-      return 'string';
+      return isOptional ? 'string | null' : 'string';
     case 'Boolean':
       return 'boolean';
     case 'DateTime':
-      return 'Date';
+      return isOptional ? 'Date | null' : 'Date';
     default:
       return 'any';
   }
+}
+
+// Функция для извлечения связей из модели
+function extractRelations(modelBody: string): string[] {
+  const lines = modelBody
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line && !line.startsWith('//') && !line.startsWith('@@'));
+  const relations: string[] = [];
+  lines.forEach((line) => {
+    const parts = line.split(/\s+/);
+    if (parts.length < 2) return;
+    const fieldName = parts[0];
+    const fieldType = parts[1].replace('?', '').replace('[]', '');
+    if (models.some((model) => model.modelName === fieldType)) {
+      relations.push(fieldName);
+    }
+  });
+  return relations;
 }

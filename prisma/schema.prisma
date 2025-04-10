@@ -18,24 +18,79 @@ enum Gender {
   female
 }
 
+enum Status {
+  processed
+  canceled
+  pending
+}
+
 model users {
-  id        Int       @id @default(autoincrement())
-  surname   String    @db.VarChar(50)
-  name      String    @db.VarChar(50)
-  password  String    @db.VarChar(255)
-  email     String    @unique @db.VarChar(50)
-  username  String    @unique @db.VarChar(50)
+  id        Int        @id @default(autoincrement())
+  surname   String     @db.VarChar(50)
+  name      String     @db.VarChar(50)
+  password  String     @db.VarChar(255)
+  email     String     @unique @db.VarChar(50)
+  username  String     @unique @db.VarChar(50)
   role      Role
-  birthDate DateTime  @db.Timestamp
-  phone     String    @db.VarChar(15)
+  birthDate DateTime   @db.Timestamp
+  phone     String     @db.VarChar(15)
   gender    Gender
   clients   clients[]
+  services  services[]
+  createdAt DateTime   @default(now())
 }
 
 model clients {
-  id      Int    @id @default(autoincrement())
-  userId  Int
-  users   users  @relation(fields: [userId], references: [id])
-  surname String @db.VarChar(50)
-  name    String @db.VarChar(50)
+  id              Int               @id @default(autoincrement())
+  userId          Int
+  users           users             @relation(fields: [userId], references: [id])
+  surname         String?           @db.VarChar(50)
+  name            String            @db.VarChar(50)
+  birthDate       DateTime?         @db.Timestamp
+  group           String?           @db.VarChar(50)
+  description     String?           @db.VarChar(500)
+  client_subjects client_subjects[]
+  records         records[]
+  createdAt       DateTime          @default(now())
+}
+
+model subjects {
+  id              Int               @id @default(autoincrement())
+  name            String            @db.VarChar(50)
+  client_subjects client_subjects[]
+  createdAt       DateTime          @default(now())
+}
+
+model client_subjects {
+  id        Int       @id @default(autoincrement())
+  clientId  Int
+  clients   clients?  @relation(fields: [clientId], references: [id])
+  subjectId Int
+  subjects  subjects? @relation(fields: [subjectId], references: [id])
+  createdAt DateTime  @default(now())
+}
+
+model services {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  users     users     @relation(fields: [userId], references: [id])
+  name      String    @db.VarChar(255)
+  records   records[]
+  createdAt DateTime  @default(now())
+}
+
+model records {
+  id          Int      @id @default(autoincrement())
+  clientId    Int
+  clients     clients  @relation(fields: [clientId], references: [id])
+  serviceId   Int
+  services    services @relation(fields: [serviceId], references: [id])
+  status      Status
+  isPaid      Boolean  @default(false)
+  description String?  @db.VarChar(500)
+  price       Int?
+  date        DateTime @db.Timestamp
+  start_time  DateTime @db.Time
+  end_time    DateTime @db.Time
+  createdAt   DateTime @default(now())
 }
