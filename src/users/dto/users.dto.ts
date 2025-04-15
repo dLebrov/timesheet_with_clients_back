@@ -1,23 +1,9 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { Gender, Role } from '@prisma/client';
+import { OmitType } from '@nestjs/swagger';
+import { usersDto } from 'src/swagger-dto/users.dto';
 
-export class CreateUsersParamsDto {
-  @ApiProperty()
-  surname: string;
-  @ApiProperty()
-  name: string;
-  @ApiProperty()
-  username: string;
-  @ApiProperty()
-  email: string;
-  @ApiProperty({ enum: Gender, enumName: 'Gender' })
-  gender: Gender;
-  @ApiProperty({ enum: Role, enumName: 'Role' })
-  role: Role;
-  @ApiProperty()
-  birthDate: Date;
-  @ApiProperty()
-  phone: string;
-  @ApiProperty()
-  password: string;
-}
+export class CreateUserDto extends OmitType(usersDto, [
+  'services',
+  'clients',
+  'id',
+  'createdAt',
+]) {}

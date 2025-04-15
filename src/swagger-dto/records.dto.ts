@@ -4,30 +4,30 @@ import { clientsDto } from "./clients.dto";
 import { servicesDto } from "./services.dto";
 
 export class recordsDto {
-    @ApiProperty()
+    @ApiProperty({ type: 'number', nullable: false })
     id: number;
-    @ApiProperty()
+    @ApiProperty({ type: 'number', nullable: false })
     clientId: number;
-    @ApiProperty()
+    @ApiProperty({ type: clientsDto, nullable: false })
     clients: Omit<clientsDto, 'users' | 'client_subjects' | 'records'>;
-    @ApiProperty()
+    @ApiProperty({ type: 'number', nullable: false })
     serviceId: number;
-    @ApiProperty()
+    @ApiProperty({ type: servicesDto, nullable: false })
     services: Omit<servicesDto, 'users' | 'records'>;
-    @ApiProperty({ enum: Status, enumName: 'Status' })
+    @ApiProperty({ type: 'string', nullable: false, enum: Status })
     status: Status;
-    @ApiProperty()
+    @ApiProperty({ type: 'boolean', nullable: false })
     isPaid: boolean;
-    @ApiProperty()
+    @ApiProperty({ type: 'string', nullable: true })
     description?: string | null;
-    @ApiProperty()
-    price?: number;
-    @ApiProperty()
+    @ApiProperty({ type: 'number', nullable: true })
+    price?: number | null;
+    @ApiProperty({ type: 'string', nullable: false })
     date: Date;
-    @ApiProperty()
+    @ApiProperty({ type: 'string', nullable: false })
     start_time: Date;
-    @ApiProperty()
+    @ApiProperty({ type: 'string', nullable: false })
     end_time: Date;
-    @ApiProperty()
+    @ApiProperty({ type: 'string', nullable: false })
     createdAt: Date;
 }

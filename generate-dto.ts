@@ -121,14 +121,36 @@ models.forEach(({ modelName, modelBody }) => {
     // Проверяем, является ли поле enum
     const isEnum = enums[fieldType] !== undefined;
     const isRelation = relatedModels.has(fieldType);
+
+    const swaggerType = isEnum
+      ? { type: 'string', nullable: false } // Используем 'string' для enum
+      : convertPrismaTypeToSwagger(fieldType, isOptional);
+
+    // Если связь с users, добавляем исключение password
+    let omitFields = '';
+    if (fieldType === 'users') {
+      omitFields = `'password'`;
+      const additionalOmissions = relatedModels
+        .get(fieldType)
+        ?.map((relation) => `'${relation}'`)
+        .join(' | ');
+      if (additionalOmissions) {
+        omitFields += ` | ${additionalOmissions}`;
+      }
+    } else if (isRelation) {
+      omitFields =
+        relatedModels
+          .get(fieldType)
+          ?.map((relation) => `'${relation}'`)
+          .join(' | ') || '';
+    }
+
     const tsType = isEnum
       ? fieldType
       : isRelation
-        ? `Omit<${fieldType}Dto, ${relatedModels
-            .get(fieldType)
-            ?.map((relation) => `'${relation}'`)
-            .join(' | ')}>`
+        ? `Omit<${fieldType}Dto, ${omitFields}>`
         : convertPrismaTypeToTs(fieldType, isOptional);
+
     const finalType = isArray ? `${tsType}[]` : tsType;
 
     // Добавляем свойство класса с декоратором ApiProperty
@@ -139,9 +161,13 @@ models.forEach(({ modelName, modelBody }) => {
       decorators: [
         {
           name: 'ApiProperty',
-          arguments: isEnum
-            ? [`{ enum: ${fieldType}, enumName: '${fieldType}' }`]
-            : [],
+          arguments: [
+            `{ type: ${isRelation ? `${fieldType}Dto` : `'${swaggerType.type}'`}, ${
+              isArray ? 'isArray: true, ' : ''
+            }nullable: ${swaggerType.nullable}${
+              isEnum ? `, enum: ${fieldType}` : ''
+            } }`,
+          ],
         },
       ],
     });
@@ -160,9 +186,9 @@ function convertPrismaTypeToTs(
 ): string {
   switch (prismaType) {
     case 'Int':
-      return 'number';
+      return isOptional ? 'number | null' : 'number';
     case 'Float':
-      return 'number';
+      return isOptional ? 'number | null' : 'number';
     case 'String':
       return isOptional ? 'string | null' : 'string';
     case 'Boolean':
@@ -171,6 +197,26 @@ function convertPrismaTypeToTs(
       return isOptional ? 'Date | null' : 'Date';
     default:
       return 'any';
+  }
+}
+
+// Функция для преобразования типов Prisma в типы Swagger
+function convertPrismaTypeToSwagger(
+  prismaType: string,
+  isOptional: boolean,
+): { type: string; nullable: boolean } {
+  switch (prismaType) {
+    case 'Int':
+    case 'Float':
+      return { type: 'number', nullable: isOptional };
+    case 'String':
+      return { type: 'string', nullable: isOptional };
+    case 'Boolean':
+      return { type: 'boolean', nullable: false };
+    case 'DateTime':
+      return { type: 'string', nullable: isOptional }; // Swagger использует строку для дат
+    default:
+      return { type: 'any', nullable: false };
   }
 }
 

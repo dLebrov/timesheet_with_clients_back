@@ -3,16 +3,16 @@ import { clientsDto } from "./clients.dto";
 import { subjectsDto } from "./subjects.dto";
 
 export class client_subjectsDto {
-    @ApiProperty()
+    @ApiProperty({ type: 'number', nullable: false })
     id: number;
-    @ApiProperty()
+    @ApiProperty({ type: 'number', nullable: false })
     clientId: number;
-    @ApiProperty()
+    @ApiProperty({ type: clientsDto, nullable: false })
     clients?: Omit<clientsDto, 'users' | 'client_subjects' | 'records'>;
-    @ApiProperty()
+    @ApiProperty({ type: 'number', nullable: false })
     subjectId: number;
-    @ApiProperty()
+    @ApiProperty({ type: subjectsDto, nullable: false })
     subjects?: Omit<subjectsDto, 'client_subjects'>;
-    @ApiProperty()
+    @ApiProperty({ type: 'string', nullable: false })
     createdAt: Date;
 }

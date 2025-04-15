@@ -3,7 +3,7 @@ import * as argon2 from 'argon2';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { usersDto } from 'src/swagger-dto/users.dto';
 import { AuthService } from './../auth/auth.service';
-import { CreateUsersParamsDto } from './dto/users.dto';
+import { CreateUserDto } from './dto/users.dto';
 
 @Injectable()
 export class UsersService {
@@ -12,12 +12,30 @@ export class UsersService {
     private readonly auth: AuthService,
   ) {}
 
-  async findAll(): Promise<Omit<usersDto, 'password'>[]> {
+  async getAllUsersService(): Promise<Omit<usersDto, 'password'>[]> {
     return this.prisma.users.findMany({
-      include: {
+      select: {
+        id: true,
+        surname: true,
+        name: true,
+        email: true,
+        username: true,
+        role: true,
+        birthDate: true,
+        phone: true,
+        gender: true,
+        createdAt: true,
         clients: {
           include: {
             users: false,
+            records: false,
+            client_subjects: false,
+          },
+        },
+        services: {
+          include: {
+            users: false,
+            records: false,
           },
         },
       },
@@ -28,9 +46,9 @@ export class UsersService {
     return await argon2.hash(password);
   }
 
-  async createUser(data: CreateUsersParamsDto): Promise<{
+  async createUser(data: CreateUserDto): Promise<{
     access_token: string;
-    user: Omit<usersDto, 'password' | 'clients'>;
+    user: Omit<usersDto, 'password'>;
   }> {
     const { email, password, username, ...user } = data;
 

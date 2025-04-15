@@ -4,30 +4,30 @@ import { clientsDto } from "./clients.dto";
 import { servicesDto } from "./services.dto";
 
 export class usersDto {
-    @ApiProperty()
+    @ApiProperty({ type: 'number', nullable: false })
     id: number;
-    @ApiProperty()
+    @ApiProperty({ type: 'string', nullable: false })
     surname: string;
-    @ApiProperty()
+    @ApiProperty({ type: 'string', nullable: false })
     name: string;
-    @ApiProperty()
+    @ApiProperty({ type: 'string', nullable: false })
     password: string;
-    @ApiProperty()
+    @ApiProperty({ type: 'string', nullable: false })
     email: string;
-    @ApiProperty()
+    @ApiProperty({ type: 'string', nullable: false })
     username: string;
-    @ApiProperty({ enum: Role, enumName: 'Role' })
+    @ApiProperty({ type: 'string', nullable: false, enum: Role })
     role: Role;
-    @ApiProperty()
+    @ApiProperty({ type: 'string', nullable: false })
     birthDate: Date;
-    @ApiProperty()
+    @ApiProperty({ type: 'string', nullable: false })
     phone: string;
-    @ApiProperty({ enum: Gender, enumName: 'Gender' })
+    @ApiProperty({ type: 'string', nullable: false, enum: Gender })
     gender: Gender;
-    @ApiProperty()
+    @ApiProperty({ type: clientsDto, isArray: true, nullable: false })
     clients: Omit<clientsDto, 'users' | 'client_subjects' | 'records'>[];
-    @ApiProperty()
+    @ApiProperty({ type: servicesDto, isArray: true, nullable: false })
     services: Omit<servicesDto, 'users' | 'records'>[];
-    @ApiProperty()
+    @ApiProperty({ type: 'string', nullable: false })
     createdAt: Date;
 }

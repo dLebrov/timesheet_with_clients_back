@@ -88,7 +88,7 @@ model records {
   status      Status
   isPaid      Boolean  @default(false)
   description String?  @db.VarChar(500)
-  price       Int?
+  price       Int?     @db.Integer
   date        DateTime @db.Timestamp
   start_time  DateTime @db.Time
   end_time    DateTime @db.Time
