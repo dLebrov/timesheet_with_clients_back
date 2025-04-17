@@ -4,7 +4,7 @@ import { AuthService } from './auth.service';
 import { LoginParamsDto, LoginResponseDto } from './dto/login.dto';
 import { usersDto } from 'src/swagger-dto/users.dto';
 
-@ApiTags('auth')
+@ApiTags('Авторизация')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}

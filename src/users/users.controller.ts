@@ -11,7 +11,7 @@ import { JwtAuthGuard } from 'src/jwt/jwt-auth.guard';
 import { usersDto } from 'src/swagger-dto/users.dto';
 import { CreateUserDto } from './dto/users.dto';
 
-@ApiTags('users')
+@ApiTags('Пользователи')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}

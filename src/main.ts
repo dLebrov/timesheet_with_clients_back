@@ -10,7 +10,7 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setTitle('tswc-api')
     .setDescription('Документация API tswc')
-    .setVersion('0.1')
+    .setVersion('0.3')
     .addBearerAuth()
     .build();
 

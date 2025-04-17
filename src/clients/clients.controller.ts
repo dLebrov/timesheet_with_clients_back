@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   Get,
+  NotFoundException,
   Param,
   Post,
   Req,
@@ -20,7 +21,7 @@ import { clientsDto } from 'src/swagger-dto/clients.dto';
 import { JwtAuthGuard } from 'src/jwt/jwt-auth.guard';
 import { createClientDto, updateClientDto } from './dto/clients.dto';
 
-@ApiTags('clients')
+@ApiTags('Клиенты')
 @Controller('clients')
 export class ClientsController {
   constructor(private readonly clientsService: ClientsService) {}
@@ -79,8 +80,6 @@ export class ClientsController {
     @Req() req: any,
   ): Promise<clientsDto> {
     const userId = req.user.id; // Получаем ID пользователя из запроса
-    debugger;
-    console.log('Создание клиента:', { userId, data });
 
     return this.clientsService.createClientService({ ...data, userId });
   }
@@ -111,7 +110,16 @@ export class ClientsController {
       throw new BadRequestException('ID клиента не передан');
     }
 
-    return this.clientsService.updateClientService(Number(id), data);
+    const updatedClient = await this.clientsService.updateClientService(
+      Number(id),
+      data,
+    );
+
+    if (!updatedClient) {
+      throw new NotFoundException(`Клиент не найден`);
+    } else {
+      return updatedClient;
+    }
   }
 
   @Post(':id/delete')

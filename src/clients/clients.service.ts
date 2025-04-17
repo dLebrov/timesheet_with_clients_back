@@ -24,8 +24,6 @@ export class ClientsService {
   async createClientService(
     data: Omit<createClientDto, 'userId'> & { userId: number },
   ): Promise<clientsDto> {
-    console.log({ data });
-
     return this.prisma.clients.create({
       data,
       include: getClientIncludes(),
@@ -36,6 +34,14 @@ export class ClientsService {
     id: number,
     data: updateClientDto,
   ): Promise<clientsDto | null> {
+    const existingClient = await this.prisma.clients.findUnique({
+      where: { id },
+    });
+
+    if (!existingClient) {
+      return null;
+    }
+
     return this.prisma.clients.update({
       where: { id },
       data,
