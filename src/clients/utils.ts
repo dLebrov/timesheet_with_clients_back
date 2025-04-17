@@ -10,7 +10,7 @@ export const getClientIncludes = () => {
     client_subjects: {
       include: {
         clients: false,
-        subjects: false,
+        subjects: true,
       },
     },
     records: {

@@ -62,12 +62,12 @@ model subjects {
 }
 
 model client_subjects {
-  id        Int       @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   clientId  Int
-  clients   clients?  @relation(fields: [clientId], references: [id])
+  clients   clients  @relation(fields: [clientId], references: [id])
   subjectId Int
-  subjects  subjects? @relation(fields: [subjectId], references: [id])
-  createdAt DateTime  @default(now())
+  subjects  subjects @relation(fields: [subjectId], references: [id])
+  createdAt DateTime @default(now())
 }
 
 model services {
