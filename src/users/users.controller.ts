@@ -1,4 +1,11 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -10,6 +17,7 @@ import { UsersService } from './users.service';
 import { JwtAuthGuard } from 'src/jwt/jwt-auth.guard';
 import { usersDto } from 'src/swagger-dto/users.dto';
 import { CreateUserDto } from './dto/users.dto';
+import { validateDto } from 'src/utils';
 
 @ApiTags('Пользователи')
 @Controller('users')
@@ -26,7 +34,15 @@ export class UsersController {
     access_token: string;
     user: Omit<usersDto, 'password' | 'clients'>;
   }> {
-    return this.usersService.createUser(createUserDto);
+    const result = validateDto(CreateUserDto, createUserDto);
+
+    if (result.valid && result.data) {
+      return this.usersService.createUser(result.data);
+    } else {
+      throw new BadRequestException(
+        result.errors.map((error) => error.message + ','),
+      );
+    }
   }
 
   @Get()

@@ -1,8 +1,9 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Post } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags, OmitType } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LoginParamsDto, LoginResponseDto } from './dto/login.dto';
 import { usersDto } from 'src/swagger-dto/users.dto';
+import { validateDto } from 'src/utils';
 
 @ApiTags('Авторизация')
 @Controller('auth')
@@ -23,6 +24,14 @@ export class AuthController {
   })
   @ApiResponse({ status: 401, description: 'Неверные учетные данные' })
   async login(@Body() body: LoginParamsDto) {
-    return this.authService.loginIn(body.login, body.password);
+    const result = validateDto(LoginParamsDto, body);
+
+    if (result.valid) {
+      return this.authService.loginIn(body.login, body.password);
+    } else {
+      throw new BadRequestException(
+        result.errors.map((error) => error.message + ','),
+      );
+    }
   }
 }

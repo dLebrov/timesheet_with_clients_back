@@ -23,6 +23,7 @@ import {
   createClient_subjectsDto,
   updateClient_subjectsDto,
 } from './dto/client_subjects.dto';
+import { validateDto } from 'src/utils';
 
 @ApiTags('Связь клиентов и предметов')
 @Controller('client_subjects')
@@ -68,7 +69,16 @@ export class Client_subjectsController {
       throw new BadRequestException('ID связи клиента и предмета не передан');
     }
 
-    return this.client_subjectsService.getClient_subjectByIdService(Number(id));
+    const result =
+      await this.client_subjectsService.getClient_subjectByIdService(
+        Number(id),
+      );
+
+    if (result) {
+      return result;
+    } else {
+      throw new NotFoundException(`Связь клиента и предмета не найдена`);
+    }
   }
 
   @Get(':id/client')
@@ -98,9 +108,16 @@ export class Client_subjectsController {
       throw new BadRequestException('ID клиента не передан');
     }
 
-    return this.client_subjectsService.getClient_subjectsByClientIdService(
-      Number(id),
-    );
+    const result =
+      await this.client_subjectsService.getClient_subjectsByClientIdService(
+        Number(id),
+      );
+
+    if (result) {
+      return result;
+    } else {
+      throw new NotFoundException(`Связь клиента и предмета не найдена`);
+    }
   }
 
   @Get(':id/subject')
@@ -126,9 +143,16 @@ export class Client_subjectsController {
       throw new BadRequestException('ID предмета не передан');
     }
 
-    return this.client_subjectsService.getClient_subjectsBySubjectIdService(
-      Number(id),
-    );
+    const result =
+      await this.client_subjectsService.getClient_subjectsBySubjectIdService(
+        Number(id),
+      );
+
+    if (result) {
+      return result;
+    } else {
+      throw new NotFoundException(`Связь клиента и предмета не найдена`);
+    }
   }
 
   @Post()
@@ -147,7 +171,17 @@ export class Client_subjectsController {
   async createClient_subject(
     @Body() data: createClient_subjectsDto,
   ): Promise<client_subjectsDto> {
-    return this.client_subjectsService.createClient_subjectService(data);
+    const result = validateDto(createClient_subjectsDto, data);
+
+    if (result.valid && result.data) {
+      return this.client_subjectsService.createClient_subjectService(
+        result.data,
+      );
+    } else {
+      throw new BadRequestException(
+        result.errors.map((error) => error.message + ','),
+      );
+    }
   }
 
   @Post(':id')
@@ -180,10 +214,18 @@ export class Client_subjectsController {
       throw new BadRequestException('ID связи клиентов и предметов не передан');
     }
 
+    const result = validateDto(updateClient_subjectsDto, data);
+
+    if (!result.valid || !result.data) {
+      throw new BadRequestException(
+        result.errors.map((error) => error.message + ','),
+      );
+    }
+
     const updatedSubject =
       await this.client_subjectsService.updateClient_subjectService(
         Number(id),
-        data,
+        result.data,
       );
 
     if (!updatedSubject) {
@@ -218,6 +260,13 @@ export class Client_subjectsController {
       throw new BadRequestException('ID связи клиентов и предметов не передан');
     }
 
-    return this.client_subjectsService.deleteClient_subjectService(Number(id));
+    const result =
+      await this.client_subjectsService.deleteClient_subjectService(Number(id));
+
+    if (result) {
+      return result;
+    } else {
+      throw new NotFoundException(`Связь клиентов и предметов не найдена`);
+    }
   }
 }

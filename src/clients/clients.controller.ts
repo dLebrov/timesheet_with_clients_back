@@ -20,6 +20,7 @@ import { ClientsService } from './clients.service';
 import { clientsDto } from 'src/swagger-dto/clients.dto';
 import { JwtAuthGuard } from 'src/jwt/jwt-auth.guard';
 import { createClientDto, updateClientDto } from './dto/clients.dto';
+import { validateDto } from 'src/utils';
 
 @ApiTags('Клиенты')
 @Controller('clients')
@@ -59,7 +60,13 @@ export class ClientsController {
       throw new BadRequestException('ID клиента не передан');
     }
 
-    return this.clientsService.getClientByIdService(Number(id));
+    const result = await this.clientsService.getClientByIdService(Number(id));
+
+    if (result) {
+      return result;
+    } else {
+      throw new NotFoundException(`Клиент не найден`);
+    }
   }
 
   @Post()
@@ -81,7 +88,19 @@ export class ClientsController {
   ): Promise<clientsDto> {
     const userId = req.user.id; // Получаем ID пользователя из запроса
 
-    return this.clientsService.createClientService({ ...data, userId });
+    const dataWithUserId = { ...data, userId };
+
+    const result = validateDto(createClientDto, dataWithUserId);
+
+    if (result.valid && result.data) {
+      return this.clientsService.createClientService(
+        result.data as typeof dataWithUserId,
+      );
+    } else {
+      throw new BadRequestException(
+        result.errors.map((error) => error.message + ','),
+      );
+    }
   }
 
   @Post(':id')
@@ -110,9 +129,17 @@ export class ClientsController {
       throw new BadRequestException('ID клиента не передан');
     }
 
+    const result = validateDto(updateClientDto, data);
+
+    if (!result.valid || !result.data) {
+      throw new BadRequestException(
+        result.errors.map((error) => error.message + ','),
+      );
+    }
+
     const updatedClient = await this.clientsService.updateClientService(
       Number(id),
-      data,
+      result.data,
     );
 
     if (!updatedClient) {
@@ -143,6 +170,14 @@ export class ClientsController {
       throw new BadRequestException('ID клиента не передан');
     }
 
-    return this.clientsService.deleteClientService(Number(id));
+    const deletedClient = await this.clientsService.deleteClientService(
+      Number(id),
+    );
+
+    if (!deletedClient) {
+      throw new NotFoundException(`Клиент не найден`);
+    } else {
+      return deletedClient;
+    }
   }
 }

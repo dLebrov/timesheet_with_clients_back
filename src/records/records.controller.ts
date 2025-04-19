@@ -20,6 +20,7 @@ import { JwtAuthGuard } from 'src/jwt/jwt-auth.guard';
 import { RecordsService } from './records.service';
 import { recordsDto } from 'src/swagger-dto/records.dto';
 import { createRecordDto, updateRecordDto } from './dto/records.dto';
+import { validateDto } from 'src/utils';
 
 @ApiTags('Записи')
 @Controller('records')
@@ -59,7 +60,13 @@ export class RecordsController {
       throw new BadRequestException('ID записи не передан');
     }
 
-    return this.recordsService.getRecordByIdService(Number(id));
+    const result = await this.recordsService.getRecordByIdService(Number(id));
+
+    if (result) {
+      return result;
+    } else {
+      throw new NotFoundException(`Запись не найдена`);
+    }
   }
 
   @Post()
@@ -76,7 +83,15 @@ export class RecordsController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   async createRecord(@Body() data: createRecordDto): Promise<recordsDto> {
-    return this.recordsService.createRecordService(data);
+    const result = validateDto(createRecordDto, data);
+
+    if (result.valid && result.data) {
+      return this.recordsService.createRecordService(result.data);
+    } else {
+      throw new BadRequestException(
+        result.errors.map((error) => error.message + ','),
+      );
+    }
   }
 
   @Post(':id')
@@ -105,9 +120,17 @@ export class RecordsController {
       throw new BadRequestException('ID записи не передан');
     }
 
+    const result = validateDto(updateRecordDto, data);
+
+    if (!result.valid || !result.data) {
+      throw new BadRequestException(
+        result.errors.map((error) => error.message + ','),
+      );
+    }
+
     const updatedRecord = await this.recordsService.updateRecordService(
       Number(id),
-      data,
+      result.data,
     );
 
     if (!updatedRecord) {
@@ -138,6 +161,12 @@ export class RecordsController {
       throw new BadRequestException('ID записи не передан');
     }
 
-    return this.recordsService.deleteRecordService(Number(id));
+    const result = await this.recordsService.deleteRecordService(Number(id));
+
+    if (result) {
+      return result;
+    } else {
+      throw new NotFoundException('Запись не найдена');
+    }
   }
 }

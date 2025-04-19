@@ -20,6 +20,7 @@ import { JwtAuthGuard } from 'src/jwt/jwt-auth.guard';
 import { ServicesService } from './services.service';
 import { servicesDto } from 'src/swagger-dto/services.dto';
 import { createServiceDto, updateServiceDto } from './dto/services.dto';
+import { validateDto } from 'src/utils';
 
 @ApiTags('Услуги')
 @Controller('services')
@@ -59,7 +60,13 @@ export class ServicesController {
       throw new BadRequestException('ID услуги не передан');
     }
 
-    return this.servicesService.getServiceByIdService(Number(id));
+    const result = await this.servicesService.getServiceByIdService(Number(id));
+
+    if (result) {
+      return result;
+    } else {
+      throw new NotFoundException(`Услуга не найдена`);
+    }
   }
 
   @Post()
@@ -81,7 +88,17 @@ export class ServicesController {
   ): Promise<servicesDto> {
     const userId = req.user.id; // Получаем ID пользователя из запроса
 
-    return this.servicesService.createServiceService({ ...data, userId });
+    const dataWithId = { ...data, userId };
+
+    const result = validateDto(createServiceDto, dataWithId);
+
+    if (result.valid && result.data) {
+      return this.servicesService.createServiceService(dataWithId);
+    } else {
+      throw new BadRequestException(
+        result.errors.map((error) => error.message + ','),
+      );
+    }
   }
 
   @Post(':id')
@@ -110,9 +127,17 @@ export class ServicesController {
       throw new BadRequestException('ID услуги не передан');
     }
 
+    const result = validateDto(updateServiceDto, data);
+
+    if (!result.valid || !result.data) {
+      throw new BadRequestException(
+        result.errors.map((error) => error.message + ','),
+      );
+    }
+
     const updatedService = await this.servicesService.updateServiceService(
       Number(id),
-      data,
+      result.data,
     );
 
     if (!updatedService) {
@@ -143,6 +168,12 @@ export class ServicesController {
       throw new BadRequestException('ID услуги не передан');
     }
 
-    return this.servicesService.deleteServiceService(Number(id));
+    const result = await this.servicesService.deleteServiceService(Number(id));
+
+    if (result) {
+      return result;
+    } else {
+      throw new NotFoundException(`Услуга не найдена`);
+    }
   }
 }

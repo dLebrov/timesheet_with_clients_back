@@ -6,7 +6,6 @@ import {
   NotFoundException,
   Param,
   Post,
-  Req,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -20,6 +19,7 @@ import { JwtAuthGuard } from 'src/jwt/jwt-auth.guard';
 import { SubjectsService } from './subjects.service';
 import { subjectsDto } from 'src/swagger-dto/subjects.dto';
 import { createSubjectDto, updateSubjectDto } from './dto/subjects.dto';
+import { validateDto } from 'src/utils';
 
 @ApiTags('Предметы')
 @Controller('subjects')
@@ -59,7 +59,13 @@ export class SubjectsController {
       throw new BadRequestException('ID предмета не передан');
     }
 
-    return this.subjectsService.getSubjectByIdService(Number(id));
+    const result = await this.subjectsService.getSubjectByIdService(Number(id));
+
+    if (result) {
+      return result;
+    } else {
+      throw new NotFoundException(`Предмет не найден`);
+    }
   }
 
   @Post()
@@ -76,7 +82,15 @@ export class SubjectsController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   async createSubject(@Body() data: createSubjectDto): Promise<subjectsDto> {
-    return this.subjectsService.createSubjectService(data);
+    const result = validateDto(createSubjectDto, data);
+
+    if (result.valid && result.data) {
+      return this.subjectsService.createSubjectService(result.data);
+    } else {
+      throw new BadRequestException(
+        result.errors.map((error) => error.message + ','),
+      );
+    }
   }
 
   @Post(':id')
@@ -105,9 +119,17 @@ export class SubjectsController {
       throw new BadRequestException('ID предмета не передан');
     }
 
+    const result = validateDto(updateSubjectDto, data);
+
+    if (!result.valid || !result.data) {
+      throw new BadRequestException(
+        result.errors.map((error) => error.message + ','),
+      );
+    }
+
     const updatedSubject = await this.subjectsService.updateSubjectService(
       Number(id),
-      data,
+      result.data,
     );
 
     if (!updatedSubject) {
@@ -138,6 +160,12 @@ export class SubjectsController {
       throw new BadRequestException('ID предмета не передан');
     }
 
-    return this.subjectsService.deleteSubjectService(Number(id));
+    const result = await this.subjectsService.deleteSubjectService(Number(id));
+
+    if (result) {
+      return result;
+    } else {
+      throw new NotFoundException('Запись не найдена');
+    }
   }
 }
