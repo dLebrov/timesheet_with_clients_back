@@ -21,9 +21,7 @@ export class ClientsService {
     });
   }
 
-  async createClientService(
-    data: Omit<createClientDto, 'userId'> & { userId: number },
-  ): Promise<clientsDto> {
+  async createClientService(data: createClientDto): Promise<clientsDto> {
     return this.prisma.clients.create({
       data,
       include: getClientIncludes(),

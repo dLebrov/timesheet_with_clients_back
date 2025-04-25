@@ -19,7 +19,11 @@ import {
 import { ClientsService } from './clients.service';
 import { clientsDto } from 'src/swagger-dto/clients.dto';
 import { JwtAuthGuard } from 'src/jwt/jwt-auth.guard';
-import { createClientDto, updateClientDto } from './dto/clients.dto';
+import {
+  createClientDto,
+  createClientParamsDto,
+  updateClientDto,
+} from './dto/clients.dto';
 import { validateDto } from 'src/utils';
 
 @ApiTags('Клиенты')
@@ -83,7 +87,7 @@ export class ClientsController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   async createClient(
-    @Body() data: createClientDto,
+    @Body() data: createClientParamsDto,
     @Req() req: any,
   ): Promise<clientsDto> {
     const userId = req.user.id; // Получаем ID пользователя из запроса
