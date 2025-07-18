@@ -11,6 +11,7 @@ export class ClientsService {
   async getAllClientsService(): Promise<clientsDto[]> {
     return this.prisma.clients.findMany({
       include: getClientIncludes(),
+      orderBy: { createdAt: 'desc' },
     });
   }
 
