@@ -48,7 +48,9 @@ export class AuthService {
 
     const payload: Omit<usersDto, 'password'> = { ...userWithoutPassword };
 
-    const access_token = this.jwtService.sign(payload);
+    const { services, clients, ...payloadForToken } = payload;
+
+    const access_token = this.jwtService.sign(payloadForToken);
 
     return { access_token, user: payload };
   }
