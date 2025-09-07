@@ -5,6 +5,7 @@ import {
   Get,
   NotFoundException,
   Param,
+  Patch,
   Post,
   Req,
   UseGuards,
@@ -94,7 +95,7 @@ export class RecordsController {
     }
   }
 
-  @Post(':id')
+  @Patch(':id')
   @ApiOperation({ summary: 'Обновить запись по ID' })
   @ApiResponse({
     status: 200,

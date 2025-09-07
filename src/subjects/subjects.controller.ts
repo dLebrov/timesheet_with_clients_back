@@ -5,6 +5,7 @@ import {
   Get,
   NotFoundException,
   Param,
+  Patch,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -93,7 +94,7 @@ export class SubjectsController {
     }
   }
 
-  @Post(':id')
+  @Patch(':id')
   @ApiOperation({ summary: 'Обновить предмет по ID' })
   @ApiResponse({
     status: 200,

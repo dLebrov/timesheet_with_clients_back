@@ -5,6 +5,7 @@ import {
   Get,
   NotFoundException,
   Param,
+  Patch,
   Post,
   Req,
   UseGuards,
@@ -101,7 +102,7 @@ export class ServicesController {
     }
   }
 
-  @Post(':id')
+  @Patch(':id')
   @ApiOperation({ summary: 'Обновить услугу по ID' })
   @ApiResponse({
     status: 200,

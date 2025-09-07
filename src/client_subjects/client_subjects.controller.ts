@@ -5,6 +5,7 @@ import {
   Get,
   NotFoundException,
   Param,
+  Patch,
   Post,
   Req,
   UseGuards,
@@ -184,7 +185,7 @@ export class Client_subjectsController {
     }
   }
 
-  @Post(':id')
+  @Patch(':id')
   @ApiOperation({ summary: 'Обновить связь клиентов и предметов по ID' })
   @ApiResponse({
     status: 200,
