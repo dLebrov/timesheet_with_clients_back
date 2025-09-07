@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
   NotFoundException,
   Param,
@@ -154,7 +155,7 @@ export class ClientsController {
     }
   }
 
-  @Post(':id/delete')
+  @Delete(':id')
   @ApiOperation({ summary: 'Удалить клиента по ID' })
   @ApiResponse({
     status: 200,

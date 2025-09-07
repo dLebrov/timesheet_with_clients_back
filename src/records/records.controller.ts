@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
   NotFoundException,
   Param,
@@ -141,7 +142,7 @@ export class RecordsController {
     }
   }
 
-  @Post(':id/delete')
+  @Delete(':id')
   @ApiOperation({ summary: 'Удалить запись по ID' })
   @ApiResponse({
     status: 200,

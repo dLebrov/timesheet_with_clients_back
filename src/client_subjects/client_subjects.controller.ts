@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
   NotFoundException,
   Param,
@@ -236,7 +237,7 @@ export class Client_subjectsController {
     }
   }
 
-  @Post(':id/delete')
+  @Delete(':id')
   @ApiOperation({ summary: 'Удалить связь клиентов и предметов по ID' })
   @ApiResponse({
     status: 200,
@@ -269,5 +270,28 @@ export class Client_subjectsController {
     } else {
       throw new NotFoundException(`Связь клиентов и предметов не найдена`);
     }
+  }
+
+  @Delete('/deleteMany')
+  @ApiOperation({ summary: 'Удалить связи клиентов и предметов по ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Связи клиентов и предметов успешно удалены',
+    type: client_subjectsDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Связи клиентов и предметов не найдены',
+  })
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  async deleteManyClient_subject(@Body('ids') ids: number[]): Promise<number> {
+    if (!ids || ids.length === 0) {
+      throw new BadRequestException(
+        'IDs связей клиентов и предметов не переданы',
+      );
+    }
+
+    return this.client_subjectsService.deleteManyClient_subjectsService(ids);
   }
 }

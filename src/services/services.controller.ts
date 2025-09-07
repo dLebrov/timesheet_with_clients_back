@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
   NotFoundException,
   Param,
@@ -36,8 +37,8 @@ export class ServicesController {
   })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  async getAllServices(): Promise<servicesDto[]> {
-    return this.servicesService.getAllServicesService();
+  async getAllServices(@Req() req: any): Promise<servicesDto[]> {
+    return this.servicesService.getAllServicesService(req.user.id);
   }
 
   @Get(':id')
@@ -56,18 +57,18 @@ export class ServicesController {
   @ApiParam({ name: 'id', type: String, description: 'ID услуги' })
   async getServiceById(
     @Param('id') id: string | undefined,
+    @Req() req: any,
   ): Promise<servicesDto | null> {
-    if (!id) {
-      throw new BadRequestException('ID услуги не передан');
-    }
+    if (!id) throw new BadRequestException('ID услуги не передан');
 
-    const result = await this.servicesService.getServiceByIdService(Number(id));
+    const result = await this.servicesService.getServiceByIdService(
+      Number(id),
+      req.user.id,
+    );
 
-    if (result) {
-      return result;
-    } else {
-      throw new NotFoundException(`Услуга не найдена`);
-    }
+    if (result) return result;
+
+    throw new NotFoundException('Услуга не найдена');
   }
 
   @Post()
@@ -89,12 +90,10 @@ export class ServicesController {
   ): Promise<servicesDto> {
     const userId = req.user.id; // Получаем ID пользователя из запроса
 
-    const dataWithId = { ...data, userId };
-
-    const result = validateDto(createServiceDto, dataWithId);
+    const result = validateDto(createServiceDto, data);
 
     if (result.valid && result.data) {
-      return this.servicesService.createServiceService(dataWithId);
+      return this.servicesService.createServiceService({ ...data, userId });
     } else {
       throw new BadRequestException(
         result.errors.map((error) => error.message + ','),
@@ -123,10 +122,9 @@ export class ServicesController {
   async updateService(
     @Param('id') id: string | undefined,
     @Body() data: updateServiceDto,
+    @Req() req: any,
   ): Promise<servicesDto | null> {
-    if (!id) {
-      throw new BadRequestException('ID услуги не передан');
-    }
+    if (!id) throw new BadRequestException('ID услуги не передан');
 
     const result = validateDto(updateServiceDto, data);
 
@@ -139,6 +137,7 @@ export class ServicesController {
     const updatedService = await this.servicesService.updateServiceService(
       Number(id),
       result.data,
+      req.user.id,
     );
 
     if (!updatedService) {
@@ -148,7 +147,7 @@ export class ServicesController {
     }
   }
 
-  @Post(':id/delete')
+  @Delete(':id')
   @ApiOperation({ summary: 'Удалить услугу по ID' })
   @ApiResponse({
     status: 200,
@@ -164,12 +163,14 @@ export class ServicesController {
   @ApiParam({ name: 'id', type: Number, description: 'ID услуги' })
   async deleteService(
     @Param('id') id: string | undefined,
+    @Req() req: any,
   ): Promise<servicesDto | null> {
-    if (!id) {
-      throw new BadRequestException('ID услуги не передан');
-    }
+    if (!id) throw new BadRequestException('ID услуги не передан');
 
-    const result = await this.servicesService.deleteServiceService(Number(id));
+    const result = await this.servicesService.deleteServiceService(
+      Number(id),
+      req.user.id,
+    );
 
     if (result) {
       return result;

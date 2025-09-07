@@ -8,15 +8,19 @@ import { createServiceDto, updateServiceDto } from './dto/services.dto';
 export class ServicesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getAllServicesService(): Promise<servicesDto[]> {
+  async getAllServicesService(userId: number): Promise<servicesDto[]> {
     return this.prisma.services.findMany({
+      where: { userId },
       include: getServicesIncludes(),
     });
   }
 
-  async getServiceByIdService(id: number): Promise<servicesDto | null> {
-    return this.prisma.services.findUnique({
-      where: { id },
+  async getServiceByIdService(
+    id: number,
+    userId: number,
+  ): Promise<servicesDto | null> {
+    return this.prisma.services.findFirst({
+      where: { id, userId },
       include: getServicesIncludes(),
     });
   }
@@ -33,14 +37,13 @@ export class ServicesService {
   async updateServiceService(
     id: number,
     data: updateServiceDto,
+    userId: number,
   ): Promise<servicesDto | null> {
-    const existingService = await this.prisma.services.findUnique({
-      where: { id },
+    const existingService = await this.prisma.services.findFirst({
+      where: { id, userId },
     });
 
-    if (!existingService) {
-      return null;
-    }
+    if (!existingService) return null;
 
     return await this.prisma.services.update({
       where: { id },
@@ -48,7 +51,17 @@ export class ServicesService {
       include: getServicesIncludes(),
     });
   }
-  async deleteServiceService(id: number): Promise<servicesDto | null> {
+  async deleteServiceService(
+    id: number,
+    userId: number,
+  ): Promise<servicesDto | null> {
+    const existingService = await this.prisma.services.findFirst({
+      where: { id, userId },
+      include: getServicesIncludes(),
+    });
+
+    if (!existingService) return null;
+
     return this.prisma.services.delete({
       where: { id },
       include: getServicesIncludes(),

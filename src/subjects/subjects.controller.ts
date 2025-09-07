@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
   NotFoundException,
   Param,
@@ -140,7 +141,7 @@ export class SubjectsController {
     }
   }
 
-  @Post(':id/delete')
+  @Delete(':id')
   @ApiOperation({ summary: 'Удалить предмет по ID' })
   @ApiResponse({
     status: 200,

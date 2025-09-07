@@ -79,16 +79,15 @@ export class Client_subjectsService {
       include: getClient_subjectsIncludes(),
     });
   }
+  async deleteManyClient_subjectsService(ids: number[]): Promise<number> {
+    const result = await this.prisma.client_subjects.deleteMany({
+      where: {
+        id: {
+          in: ids,
+        },
+      },
+    });
 
-  // async deleteManyClient_subjectsService(ids: number[]): Promise<number> {
-  //   const result = await this.prisma.client_subjects.deleteMany({
-  //     where: {
-  //       id: {
-  //         in: ids,
-  //       },
-  //     },
-  //   });
-
-  //   return result.count;
-  // }
+    return result.count;
+  }
 }
