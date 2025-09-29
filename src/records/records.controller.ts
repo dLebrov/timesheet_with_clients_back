@@ -85,11 +85,17 @@ export class RecordsController {
   })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  async createRecord(@Body() data: createRecordDto): Promise<recordsDto> {
+  async createRecord(
+    @Body() data: createRecordDto,
+    @Req() req: any,
+  ): Promise<recordsDto> {
     const result = validateDto(createRecordDto, data);
 
     if (result.valid && result.data) {
-      return this.recordsService.createRecordService(result.data);
+      return this.recordsService.createRecordService({
+        ...result.data,
+        usersId: req.user.id,
+      });
     } else {
       throw new BadRequestException(
         result.errors.map((error) => error.message + ','),

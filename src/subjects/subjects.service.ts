@@ -8,8 +8,9 @@ import { createSubjectDto, updateSubjectDto } from './dto/subjects.dto';
 export class SubjectsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getAllSubjectsService(): Promise<subjectsDto[]> {
+  async getAllSubjectsService(userId: number): Promise<subjectsDto[]> {
     return this.prisma.subjects.findMany({
+      where: { userId },
       include: getSubjectsIncludes(),
     });
   }
@@ -21,7 +22,9 @@ export class SubjectsService {
     });
   }
 
-  async createSubjectService(data: createSubjectDto): Promise<subjectsDto> {
+  async createSubjectService(
+    data: Omit<createSubjectDto, 'usersId'> & { usersId: number },
+  ): Promise<subjectsDto> {
     return this.prisma.subjects.create({
       data,
       include: getSubjectsIncludes(),

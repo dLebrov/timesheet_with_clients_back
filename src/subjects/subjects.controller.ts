@@ -8,6 +8,7 @@ import {
   Param,
   Patch,
   Post,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -36,8 +37,9 @@ export class SubjectsController {
   })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  async getAllSubjects(): Promise<subjectsDto[]> {
-    return this.subjectsService.getAllSubjectsService();
+  async getAllSubjects(@Req() req: any): Promise<subjectsDto[]> {
+    const userId = req.user.id;
+    return this.subjectsService.getAllSubjectsService(userId);
   }
 
   @Get(':id')
@@ -83,11 +85,17 @@ export class SubjectsController {
   })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  async createSubject(@Body() data: createSubjectDto): Promise<subjectsDto> {
+  async createSubject(
+    @Body() data: createSubjectDto,
+    @Req() req: any,
+  ): Promise<subjectsDto> {
     const result = validateDto(createSubjectDto, data);
 
     if (result.valid && result.data) {
-      return this.subjectsService.createSubjectService(result.data);
+      return this.subjectsService.createSubjectService({
+        ...result.data,
+        usersId: req.user.id,
+      });
     } else {
       throw new BadRequestException(
         result.errors.map((error) => error.message + ','),
