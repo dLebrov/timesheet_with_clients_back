@@ -45,7 +45,7 @@ export class Client_subjectsService {
   }
 
   async createClient_subjectService(
-    data: createClient_subjectsDto,
+    data: Omit<createClient_subjectsDto, 'userId'> & { userId: number },
   ): Promise<client_subjectsDto> {
     return this.prisma.client_subjects.create({
       data,

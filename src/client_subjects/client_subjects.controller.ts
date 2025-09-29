@@ -172,13 +172,16 @@ export class Client_subjectsController {
   @UseGuards(JwtAuthGuard)
   async createClient_subject(
     @Body() data: createClient_subjectsDto,
+    @Req() req: any,
   ): Promise<client_subjectsDto> {
+    const userId = req.user.id;
     const result = validateDto(createClient_subjectsDto, data);
 
     if (result.valid && result.data) {
-      return this.client_subjectsService.createClient_subjectService(
-        result.data,
-      );
+      return this.client_subjectsService.createClient_subjectService({
+        ...result.data,
+        userId,
+      });
     } else {
       throw new BadRequestException(
         result.errors.map((error) => error.message + ','),
