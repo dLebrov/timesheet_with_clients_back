@@ -94,7 +94,7 @@ export class RecordsController {
     if (result.valid && result.data) {
       return this.recordsService.createRecordService({
         ...result.data,
-        usersId: req.user.id,
+        userId: req.user.id,
       });
     } else {
       throw new BadRequestException(

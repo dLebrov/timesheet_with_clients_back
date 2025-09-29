@@ -73,8 +73,8 @@ model client_subjects {
   subjectId Int
   subjects  subjects @relation(fields: [subjectId], references: [id])
   createdAt DateTime @default(now())
-  users     users?   @relation(fields: [usersId], references: [id])
-  usersId   Int?
+  users     users    @relation(fields: [userId], references: [id])
+  userId    Int
 }
 
 model services {

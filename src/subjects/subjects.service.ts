@@ -23,7 +23,7 @@ export class SubjectsService {
   }
 
   async createSubjectService(
-    data: Omit<createSubjectDto, 'usersId'> & { usersId: number },
+    data: Omit<createSubjectDto, 'userId'> & { userId: number },
   ): Promise<subjectsDto> {
     return this.prisma.subjects.create({
       data,

@@ -94,7 +94,7 @@ export class SubjectsController {
     if (result.valid && result.data) {
       return this.subjectsService.createSubjectService({
         ...result.data,
-        usersId: req.user.id,
+        userId: req.user.id,
       });
     } else {
       throw new BadRequestException(

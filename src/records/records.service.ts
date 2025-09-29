@@ -23,7 +23,7 @@ export class RecordsService {
   }
 
   async createRecordService(
-    data: Omit<createRecordDto, 'usersId'> & { usersId: number },
+    data: Omit<createRecordDto, 'userId'> & { userId: number },
   ): Promise<recordsDto> {
     return this.prisma.records.create({
       data,
