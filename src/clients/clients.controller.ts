@@ -41,8 +41,9 @@ export class ClientsController {
   })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  async getAllClients(): Promise<clientsDto[]> {
-    return this.clientsService.getAllClientsService();
+  async getAllClients(@Req() req: any): Promise<clientsDto[]> {
+    const userId = req.user.id; // Получаем ID пользователя из запроса
+    return this.clientsService.getAllClientsService(userId);
   }
 
   @Get(':id')

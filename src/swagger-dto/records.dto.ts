@@ -1,5 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Status } from "@prisma/client";
+import { usersDto } from "./users.dto";
 import { clientsDto } from "./clients.dto";
 import { servicesDto } from "./services.dto";
 import { IsDefined, IsNumber, ValidateNested, IsEnum, IsBoolean, IsOptional, IsString, IsDate } from "class-validator";
@@ -10,6 +11,15 @@ export class recordsDto {
     @IsNumber()
     @ApiProperty({ type: 'number', nullable: false })
     id: number;
+    @IsDefined()
+    @IsNumber()
+    @ApiProperty({ type: 'number', nullable: false })
+    userId: number;
+    @IsDefined()
+    @ValidateNested({ each: true })
+    @Type(() => usersDto)
+    @ApiProperty({ type: usersDto, nullable: false })
+    users: Omit<usersDto, 'clients' | 'services' | 'subjects' | 'records' | 'password'>;
     @IsDefined()
     @IsNumber()
     @ApiProperty({ type: 'number', nullable: false })

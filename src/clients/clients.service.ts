@@ -8,8 +8,9 @@ import { createClientDto, updateClientDto } from './dto/clients.dto';
 export class ClientsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getAllClientsService(): Promise<clientsDto[]> {
+  async getAllClientsService(userId: number): Promise<clientsDto[]> {
     return this.prisma.clients.findMany({
+      where: { userId },
       include: getClientIncludes(),
       orderBy: { createdAt: 'desc' },
     });

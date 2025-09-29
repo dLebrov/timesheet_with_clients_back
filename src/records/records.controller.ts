@@ -37,8 +37,9 @@ export class RecordsController {
   })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  async getAllRecords(): Promise<recordsDto[]> {
-    return this.recordsService.getAllRecordsService();
+  async getAllRecords(@Req() req: any): Promise<recordsDto[]> {
+    const userId = req.user.id; // Получаем ID пользователя из запроса
+    return this.recordsService.getAllRecordsService(userId);
   }
 
   @Get(':id')

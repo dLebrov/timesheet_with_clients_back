@@ -3,12 +3,14 @@ import { subjectsDto } from 'src/swagger-dto/subjects.dto';
 
 export class createSubjectDto extends OmitType(subjectsDto, [
   'id',
+  'users',
   'client_subjects',
   'createdAt',
 ]) {}
 
 export class updateSubjectDto extends OmitType(subjectsDto, [
   'id',
+  'users',
   'client_subjects',
   'createdAt',
 ]) {}

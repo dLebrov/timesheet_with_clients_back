@@ -8,8 +8,9 @@ import { getRecordsIncludes } from './utils';
 export class RecordsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getAllRecordsService(): Promise<recordsDto[]> {
+  async getAllRecordsService(userId: number): Promise<recordsDto[]> {
     return this.prisma.records.findMany({
+      where: { userId },
       include: getRecordsIncludes(),
     });
   }

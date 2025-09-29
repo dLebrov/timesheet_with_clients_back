@@ -20,6 +20,19 @@ export class AuthService {
         OR: [{ email: login }, { username: login }],
       },
       include: {
+        subjects: {
+          include: {
+            users: false,
+            client_subjects: false,
+          },
+        },
+        records: {
+          include: {
+            users: false,
+            clients: false,
+            services: false,
+          },
+        },
         clients: {
           include: {
             client_subjects: false,

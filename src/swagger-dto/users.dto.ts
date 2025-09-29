@@ -2,6 +2,8 @@ import { ApiProperty } from "@nestjs/swagger";
 import { Role, Gender } from "@prisma/client";
 import { clientsDto } from "./clients.dto";
 import { servicesDto } from "./services.dto";
+import { subjectsDto } from "./subjects.dto";
+import { recordsDto } from "./records.dto";
 import { IsDefined, IsNumber, IsString, IsEnum, IsDate, IsArray, ValidateNested } from "class-validator";
 import { Type } from "class-transformer";
 
@@ -59,6 +61,18 @@ export class usersDto {
     @Type(() => servicesDto)
     @ApiProperty({ type: servicesDto, isArray: true, nullable: false })
     services: Omit<servicesDto, 'users' | 'records'>[];
+    @IsDefined()
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => subjectsDto)
+    @ApiProperty({ type: subjectsDto, isArray: true, nullable: false })
+    subjects: Omit<subjectsDto, 'users' | 'client_subjects'>[];
+    @IsDefined()
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => recordsDto)
+    @ApiProperty({ type: recordsDto, isArray: true, nullable: false })
+    records: Omit<recordsDto, 'users' | 'clients' | 'services'>[];
     @IsDefined()
     @IsDate()
     @Type(() => Date)

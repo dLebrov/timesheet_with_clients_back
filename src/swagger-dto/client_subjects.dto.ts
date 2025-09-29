@@ -26,7 +26,7 @@ export class client_subjectsDto {
     @ValidateNested({ each: true })
     @Type(() => subjectsDto)
     @ApiProperty({ type: subjectsDto, nullable: false })
-    subjects: Omit<subjectsDto, 'client_subjects'>;
+    subjects: Omit<subjectsDto, 'users' | 'client_subjects'>;
     @IsDefined()
     @IsDate()
     @Type(() => Date)

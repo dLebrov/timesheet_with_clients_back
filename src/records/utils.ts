@@ -1,5 +1,11 @@
 export const getRecordsIncludes = () => {
   return {
+    users: {
+      include: {
+        services: false,
+        clients: false,
+      },
+    },
     clients: {
       include: {
         records: false,

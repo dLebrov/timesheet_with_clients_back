@@ -1,6 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
+import { usersDto } from "./users.dto";
 import { client_subjectsDto } from "./client_subjects.dto";
-import { IsDefined, IsNumber, IsString, IsArray, ValidateNested, IsDate } from "class-validator";
+import { IsDefined, IsNumber, ValidateNested, IsString, IsArray, IsDate } from "class-validator";
 import { Type } from "class-transformer";
 
 export class subjectsDto {
@@ -8,6 +9,15 @@ export class subjectsDto {
     @IsNumber()
     @ApiProperty({ type: 'number', nullable: false })
     id: number;
+    @IsDefined()
+    @IsNumber()
+    @ApiProperty({ type: 'number', nullable: false })
+    userId: number;
+    @IsDefined()
+    @ValidateNested({ each: true })
+    @Type(() => usersDto)
+    @ApiProperty({ type: usersDto, nullable: false })
+    users: Omit<usersDto, 'clients' | 'services' | 'subjects' | 'records' | 'password'>;
     @IsDefined()
     @IsString()
     @ApiProperty({ type: 'string', nullable: false })
