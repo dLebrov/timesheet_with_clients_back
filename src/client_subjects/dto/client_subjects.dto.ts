@@ -3,6 +3,8 @@ import { client_subjectsDto } from 'src/swagger-dto/client_subjects.dto';
 
 export class createClient_subjectsDto extends OmitType(client_subjectsDto, [
   'id',
+  'userId',
+  'users',
   'clients',
   'subjects',
   'createdAt',
@@ -10,6 +12,8 @@ export class createClient_subjectsDto extends OmitType(client_subjectsDto, [
 
 export class updateClient_subjectsDto extends OmitType(client_subjectsDto, [
   'id',
+  'userId',
+  'users',
   'clients',
   'subjects',
   'createdAt',

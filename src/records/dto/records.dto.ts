@@ -3,6 +3,8 @@ import { recordsDto } from 'src/swagger-dto/records.dto';
 
 export class createRecordDto extends OmitType(recordsDto, [
   'id',
+  'userId',
+  'subjects',
   'users',
   'clients',
   'services',
@@ -11,7 +13,9 @@ export class createRecordDto extends OmitType(recordsDto, [
 
 export class updateRecordDto extends OmitType(recordsDto, [
   'id',
+  'userId',
   'users',
+  'subjects',
   'clients',
   'services',
   'createdAt',

@@ -37,6 +37,13 @@ export class UsersService {
             client_subjects: false,
           },
         },
+        client_subjects: {
+          include: {
+            users: false,
+            clients: false,
+            subjects: false,
+          },
+        },
         records: {
           include: {
             users: false,

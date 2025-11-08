@@ -22,6 +22,7 @@ enum Status {
   processed
   canceled
   pending
+  postponed
 }
 
 model users {
@@ -64,6 +65,7 @@ model subjects {
   name            String            @db.VarChar(50)
   client_subjects client_subjects[]
   createdAt       DateTime          @default(now())
+  records         records[]
 }
 
 model client_subjects {
@@ -87,19 +89,21 @@ model services {
 }
 
 model records {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   userId      Int
-  users       users    @relation(fields: [userId], references: [id])
+  users       users     @relation(fields: [userId], references: [id])
   clientId    Int
-  clients     clients  @relation(fields: [clientId], references: [id])
+  clients     clients   @relation(fields: [clientId], references: [id])
   serviceId   Int
-  services    services @relation(fields: [serviceId], references: [id])
+  services    services  @relation(fields: [serviceId], references: [id])
   status      Status
-  isPaid      Boolean  @default(false)
-  description String?  @db.VarChar(500)
-  price       Int?     @db.Integer
-  date        DateTime @db.Timestamp
-  start_time  DateTime @db.Time
-  end_time    DateTime @db.Time
-  createdAt   DateTime @default(now())
+  subjectId   Int?
+  subjects    subjects? @relation(fields: [subjectId], references: [id])
+  isPaid      Boolean   @default(false)
+  description String?   @db.VarChar(500)
+  price       Int?      @db.Integer
+  date        DateTime  @db.Timestamp
+  start_time  DateTime  @db.Time
+  end_time    DateTime  @db.Time
+  createdAt   DateTime  @default(now())
 }

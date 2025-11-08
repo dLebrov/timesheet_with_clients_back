@@ -18,7 +18,7 @@ export class clientsDto {
     @ValidateNested({ each: true })
     @Type(() => usersDto)
     @ApiProperty({ type: usersDto, nullable: false })
-    users: Omit<usersDto, 'clients' | 'services' | 'subjects' | 'records' | 'password'>;
+    users: Omit<usersDto, 'clients' | 'services' | 'subjects' | 'records' | 'client_subjects' | 'password'>;
     @IsOptional()
     @IsString()
     @ApiProperty({ type: 'string', nullable: true })
@@ -45,13 +45,13 @@ export class clientsDto {
     @ValidateNested({ each: true })
     @Type(() => client_subjectsDto)
     @ApiProperty({ type: client_subjectsDto, isArray: true, nullable: false })
-    client_subjects: Omit<client_subjectsDto, 'clients' | 'subjects'>[];
+    client_subjects: Omit<client_subjectsDto, 'clients' | 'subjects' | 'users'>[];
     @IsDefined()
     @IsArray()
     @ValidateNested({ each: true })
     @Type(() => recordsDto)
     @ApiProperty({ type: recordsDto, isArray: true, nullable: false })
-    records: Omit<recordsDto, 'users' | 'clients' | 'services'>[];
+    records: Omit<recordsDto, 'users' | 'clients' | 'services' | 'subjects'>[];
     @IsDefined()
     @IsDate()
     @Type(() => Date)

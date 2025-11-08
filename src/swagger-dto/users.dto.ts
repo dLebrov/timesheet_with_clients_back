@@ -4,6 +4,7 @@ import { clientsDto } from "./clients.dto";
 import { servicesDto } from "./services.dto";
 import { subjectsDto } from "./subjects.dto";
 import { recordsDto } from "./records.dto";
+import { client_subjectsDto } from "./client_subjects.dto";
 import { IsDefined, IsNumber, IsString, IsEnum, IsDate, IsArray, ValidateNested } from "class-validator";
 import { Type } from "class-transformer";
 
@@ -66,16 +67,22 @@ export class usersDto {
     @ValidateNested({ each: true })
     @Type(() => subjectsDto)
     @ApiProperty({ type: subjectsDto, isArray: true, nullable: false })
-    subjects: Omit<subjectsDto, 'users' | 'client_subjects'>[];
+    subjects: Omit<subjectsDto, 'users' | 'client_subjects' | 'records'>[];
     @IsDefined()
     @IsArray()
     @ValidateNested({ each: true })
     @Type(() => recordsDto)
     @ApiProperty({ type: recordsDto, isArray: true, nullable: false })
-    records: Omit<recordsDto, 'users' | 'clients' | 'services'>[];
+    records: Omit<recordsDto, 'users' | 'clients' | 'services' | 'subjects'>[];
     @IsDefined()
     @IsDate()
     @Type(() => Date)
     @ApiProperty({ type: 'string', nullable: false })
     createdAt: Date;
+    @IsDefined()
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => client_subjectsDto)
+    @ApiProperty({ type: client_subjectsDto, isArray: true, nullable: false })
+    client_subjects: Omit<client_subjectsDto, 'clients' | 'subjects' | 'users'>[];
 }
