@@ -49,9 +49,27 @@ export class RecordsService {
       include: getRecordsIncludes(),
     });
   }
+
   async deleteRecordService(id: number): Promise<recordsDto | null> {
     return this.prisma.records.delete({
       where: { id },
+      include: getRecordsIncludes(),
+    });
+  }
+
+  async searchRecordsService(
+    userId: number,
+    searchDate: string,
+    searchStartTime: string,
+    searchEndTime: string,
+  ): Promise<recordsDto | null> {
+    return this.prisma.records.findFirst({
+      where: {
+        userId,
+        date: searchDate,
+        start_time: { lt: searchEndTime },
+        end_time: { gt: searchStartTime },
+      },
       include: getRecordsIncludes(),
     });
   }

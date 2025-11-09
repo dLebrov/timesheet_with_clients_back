@@ -8,6 +8,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -28,6 +29,7 @@ import { validateDto } from 'src/utils';
 @Controller('records')
 export class RecordsController {
   constructor(private readonly recordsService: RecordsService) {}
+
   @Get()
   @ApiOperation({ summary: 'Получить все записи' })
   @ApiResponse({
@@ -40,6 +42,41 @@ export class RecordsController {
   async getAllRecords(@Req() req: any): Promise<recordsDto[]> {
     const userId = req.user.id; // Получаем ID пользователя из запроса
     return this.recordsService.getAllRecordsService(userId);
+  }
+
+  @Get('search')
+  @ApiOperation({ summary: 'Поиск записи по дате и времени' })
+  @ApiResponse({
+    status: 200,
+    description: 'Запись успешно найдена',
+    type: recordsDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Запись не найдена',
+  })
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  async searchRecordByDateAndTime(
+    @Req() req: any,
+    @Query('date') date: string,
+    @Query('startTime') startTime: string,
+    @Query('endTime') endTime: string,
+  ): Promise<recordsDto | null> {
+    const userId = req.user.id; // Получаем ID пользователя из запроса
+
+    const result = await this.recordsService.searchRecordsService(
+      userId,
+      date,
+      startTime,
+      endTime,
+    );
+
+    if (result) {
+      return result;
+    } else {
+      throw new NotFoundException('Запись не найдена');
+    }
   }
 
   @Get(':id')
