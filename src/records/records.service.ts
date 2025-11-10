@@ -67,6 +67,7 @@ export class RecordsService {
       where: {
         userId,
         date: searchDate,
+        status: { not: 'canceled' },
         start_time: { lt: searchEndTime },
         end_time: { gt: searchStartTime },
       },
